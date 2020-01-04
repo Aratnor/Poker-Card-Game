@@ -22,6 +22,10 @@ public class Hand {
         return true;
     }
 
+    public void clearHand() {
+        hand.clear();
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

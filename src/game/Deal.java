@@ -46,6 +46,10 @@ public class Deal {
         }
     }
 
+    public void clearTotalBidOnTable() {
+        totalBidOnTable = 0;
+    }
+
     public void fold() {
         foldedPlayers++;
     }
@@ -63,7 +67,10 @@ public class Deal {
         totalBidOnTable += bidAmount;
         isBidRaised = true;
         totalCheck = 0;
+    }
 
+    public void resetBidTurn() {
+        bidTurn = 0;
     }
     public void raise(int raiseAmount) {
         bidAmount =  bidAmount + raiseAmount;

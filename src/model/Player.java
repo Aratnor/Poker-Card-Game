@@ -45,6 +45,10 @@ public class Player {
         }
     }
 
+    public void addChipsToUser(int newChips) {
+        userChips += newChips;
+    }
+
     public void raise(int amount) {
         userChips = userChips - amount - deal.getBidAmount();
         deal.raise(amount);

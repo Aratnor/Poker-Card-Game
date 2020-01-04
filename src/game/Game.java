@@ -8,6 +8,7 @@ import rank.HandRank;
 import rank.RankUtils;
 import util.PlayerUtils;
 
+import java.lang.management.PlatformLoggingMXBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -87,9 +88,21 @@ public class Game {
                         }
                         //TODO En iyi iki el varsa burda kontrol etmek gerekiyor
                     }
-                    System.out.println("Player : " +bestPosition +  " take the turn .");
+                    int pos = bestRankedHandPositions.get(bestPosition);
+                    Player winner = playerList.get(pos);
+                    winner.setUserChips(deal.getTotalBidOnTable());
+                    deal.clearTotalBidOnTable();
+                    System.out.println("Player : " + pos +  " take the turn .");
+                    System.out.println("His hand : \n" + winner.getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
+                    System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(bestPosition).toString());
+                    System.out.println("\nBest hand rank : " + bestRank);
+                    System.out.println("Do u want to continue playing ? y/n");
+                    String res = scanner.next();
+                    if(res.equals("n")) break;
+
                 }
-                break;
+                deal.resetBidTurn();
+                setNewHands();
             }
             if(currentPlayer == realPlayerPosition){
                 Player realPlayer = playerList.get(realPlayerPosition);
@@ -128,6 +141,13 @@ public class Game {
     public void initTableCards() {
         tableHand = new Hand(false);
         tableHand.setHand(deck.dealCardToTable());
+    }
+
+    public void setNewHands() {
+        tableHand.clearHand();
+        for(Player player : playerList)player.getPlayerHand().clearHand();
+        initPlayerDeck();
+        initTableCards();
     }
 
     public void initPlayerDeck() {
