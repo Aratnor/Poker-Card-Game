@@ -1,5 +1,6 @@
 package game;
 
+import model.bet.BetType;
 import util.BidUtils;
 
 public class Deal {
@@ -9,7 +10,9 @@ public class Deal {
     int totalPlayer;
     int bidTurn = 0;
     int foldedPlayers = 0;
+    BetType currentBetType;
 
+    boolean canCheck;
     boolean isBidRaised;
     boolean isOneTurnCompleted;
 
@@ -21,10 +24,14 @@ public class Deal {
         totalPlayer = 0;
         isOneTurnCompleted = false;
         this.totalPlayer = playerSize;
+        canCheck = false;
+        currentBetType = BetType.CALL;
     }
 
     public void call() {
         totalBidOnTable += bidAmount;
+        canCheck = false;
+        currentBetType = BetType.CALL;
         check();
     }
 
@@ -41,7 +48,7 @@ public class Deal {
             totalCheck = 0;
             isOneTurnCompleted = true;
             bidTurn++;
-            bidAmount = BidUtils.INITIAL_BID;
+            canCheck = true;
             isBidRaised = false;
         }
     }
@@ -63,20 +70,40 @@ public class Deal {
     }
 
     public void doubleBid() {
+        currentBetType = BetType.DOUBLE_BID;
         bidAmount = bidAmount * 2;
         totalBidOnTable += bidAmount;
         isBidRaised = true;
+        canCheck = false;
         totalCheck = 0;
+    }
+    public boolean canUserCheck() {
+        return canCheck;
+    }
+
+    public void checkBid() {
+        check();
+        currentBetType = BetType.CHECK;
+    }
+
+    public void allIn(int chips) {
+        bidAmount = chips;
+        totalBidOnTable += chips;
+        totalCheck = 0;
+        isBidRaised = true;
+        currentBetType = BetType.ALL_IN;
     }
 
     public void resetBidTurn() {
         bidTurn = 0;
+        bidAmount = BidUtils.INITIAL_BID;
     }
     public void raise(int raiseAmount) {
         bidAmount =  bidAmount + raiseAmount;
         totalBidOnTable += bidAmount;
         totalCheck = 0;
         isBidRaised = true;
+        currentBetType = BetType.RAISE;
     }
 
     public int getBidAmount() {

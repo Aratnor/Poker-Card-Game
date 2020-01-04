@@ -1,14 +1,15 @@
 package game;
 
+import ai.AIMovement;
 import model.Player;
 import model.card.Deck;
 import model.card.Hand;
 import model.rank.Rank;
 import rank.HandRank;
 import rank.RankUtils;
+import util.GameUtils;
 import util.PlayerUtils;
 
-import java.lang.management.PlatformLoggingMXBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -42,40 +43,18 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         while(true) {
             if(currentPlayer == playerList.size()) currentPlayer = 0;
-            if(deal.isOneTurnCompleted && deal.getBidTurn() < 3){
-                tableHand.addCardToHand(deck.getCard());
-                deal.setOneTurnCompleted(false);
-            }
+            addCardToTable();
             if(deal.getBidTurn() == 3) {
-                Rank bestRank =  Rank.High_Card;
+                Rank bestRank = GameUtils.getBestRank(playerList, tableHand);
                 List<Hand> bestRankedHands = new ArrayList<>();
                 List<Integer> bestRankedHandPositions = new ArrayList<>();
-                for(int i = 0; i < playerList.size(); i++) {
-                    Player realPlayer = playerList.get(i);
-                    HandRank handRank = new HandRank(tableHand, realPlayer.getPlayerHand());
-                    Rank rankPlayer = handRank.getRankOfHand();
-                    if(i == 0){
-                        bestRank = rankPlayer;
-                    }
-                    else if(rankPlayer.getValue() > bestRank.getValue()) {
-                        bestRank = rankPlayer;
-                    }
-                }
 
-                for(int i = 0; i< playerList.size(); i++) {
-                    Player realPlayer = playerList.get(i);
-                    HandRank handRank = new HandRank(tableHand,realPlayer.getPlayerHand());
-                    Rank rankPlayer = handRank.getRankOfHand();
-                    if(bestRank.getValue() == rankPlayer.getValue()) {
-                        Hand hand = new Hand(false);
-                        hand.setHand(handRank.getRankedCards());
-                        bestRankedHands.add(hand);
-                        bestRankedHandPositions.add(i);
-                    }
-                }
+                setBestHands(bestRank, bestRankedHandPositions, bestRankedHands);
 
                 if(bestRankedHandPositions.size() == 1) {
-                    System.out.println("Player : " + bestRankedHandPositions.get(0) +  " take the turn .");
+                    GameUtils.setWinnerWindow(bestRankedHandPositions,bestRankedHands,playerList,bestRank,tableHand);
+                    String res = scanner.next();
+                    if(res.equals("n")) break;
                 } else {
                     int bestPosition = 0;
                     Hand bestPositionRankedHand = bestRankedHands.get(bestPosition);
@@ -92,11 +71,7 @@ public class Game {
                     Player winner = playerList.get(pos);
                     winner.setUserChips(deal.getTotalBidOnTable());
                     deal.clearTotalBidOnTable();
-                    System.out.println("Player : " + pos +  " take the turn .");
-                    System.out.println("His hand : \n" + winner.getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
-                    System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(bestPosition).toString());
-                    System.out.println("\nBest hand rank : " + bestRank);
-                    System.out.println("Do u want to continue playing ? y/n");
+                    GameUtils.setWinnerWindow(pos, winner, tableHand, bestPosition, bestRankedHands, bestRank);
                     String res = scanner.next();
                     if(res.equals("n")) break;
 
@@ -104,15 +79,9 @@ public class Game {
                 deal.resetBidTurn();
                 setNewHands();
             }
-            if(currentPlayer == realPlayerPosition){
+            if(currentPlayer == realPlayerPosition && !playerList.get(realPlayerPosition).isFold()){
                 Player realPlayer = playerList.get(realPlayerPosition);
-                System.out.println("Table cards \t---------");
-                System.out.println(tableHand.toString());
-                System.out.println("Your cards \t---------");
-                System.out.println(realPlayer.getPlayerHand().toString());
-                System.out.println("Current bid: " + deal.getBidAmount());
-                System.out.println("Current totalChips on Table : " + deal.getTotalBidOnTable());
-                System.out.println("Please Enter your bet if u want to raise ... fold 1 , call 2 ,");
+                GameUtils.userBetScreen(deal, tableHand, realPlayer);
                 int betValue = scanner.nextInt();
                 switch (betValue){
                     case 1 :
@@ -126,8 +95,17 @@ public class Game {
                 }
                 currentPlayer++;
             } else {
-                System.out.println("Player : " + playerList.get(currentPlayer).toString() +  " \n Call...");
-                playerList.get(currentPlayer).call();
+                if(playerList.get(currentPlayer).isFold()){
+                    currentPlayer++;
+                    continue;
+                }
+                Player currentAiPlayer = playerList.get(currentPlayer);
+                HandRank handRanker = new HandRank(tableHand, currentAiPlayer.getPlayerHand());
+                Rank handRank = handRanker.getRankOfHand();
+                Hand rankedHand = new Hand(false);
+                rankedHand.setHand(handRanker.getRankedCards());
+                AIMovement aiMovement = new AIMovement(currentAiPlayer,handRank,rankedHand,deal.bidAmount,deal.getBidTurn(),deal.currentBetType);
+                aiMovement.decideMove();
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -145,9 +123,33 @@ public class Game {
 
     public void setNewHands() {
         tableHand.clearHand();
-        for(Player player : playerList)player.getPlayerHand().clearHand();
+        for(Player player : playerList){
+            player.setFold(false);
+            player.getPlayerHand().clearHand();
+        }
         initPlayerDeck();
         initTableCards();
+    }
+
+    private void setBestHands(Rank bestRank, List<Integer > bestRankedHandPositions, List<Hand> bestRankedHands) {
+        for(int i = 0; i< playerList.size(); i++) {
+            Player realPlayer = playerList.get(i);
+            HandRank handRank = new HandRank(tableHand,realPlayer.getPlayerHand());
+            Rank rankPlayer = handRank.getRankOfHand();
+            if(bestRank.getValue() == rankPlayer.getValue()) {
+                Hand hand = new Hand(false);
+                hand.setHand(handRank.getRankedCards());
+                bestRankedHands.add(hand);
+                bestRankedHandPositions.add(i);
+            }
+        }
+    }
+
+    private void addCardToTable(){
+        if(deal.isOneTurnCompleted && deal.getBidTurn() < 3){
+            tableHand.addCardToHand(deck.getCard());
+            deal.setOneTurnCompleted(false);
+        }
     }
 
     public void initPlayerDeck() {

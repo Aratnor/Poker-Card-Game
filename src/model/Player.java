@@ -23,8 +23,15 @@ public class Player {
         return userChips >= deal.getBidAmount();
     }
 
-    public boolean canUserBetDoubleBit(int bidAmount) {
-        return userChips >= (bidAmount * 2);
+    public boolean canUserBetDoubleBit() {
+        int doubleBit = deal.getBidAmount() * 2;
+        return userChips >= doubleBit;
+    }
+
+    public void userDoubleBid() {
+        int doubleBid = deal.getBidAmount() * 2;
+        userChips = userChips - doubleBid;
+        deal.doubleBid();
     }
 
     public void foldCurrentTurn() {
@@ -44,9 +51,23 @@ public class Player {
             deal.call();
         }
     }
-
     public void addChipsToUser(int newChips) {
         userChips += newChips;
+    }
+
+    public boolean canUserCheck() {
+        return deal.canUserCheck();
+    }
+
+    public boolean canUserRaise(int amount) {
+        int totalChips = amount + deal.getBidAmount();
+        return userChips >= totalChips;
+    }
+
+    public void userRaiseBid(int amount) {
+        int totalChips = amount + deal.getBidAmount();
+        userChips = userChips - totalChips;
+        deal.raise(amount);
     }
 
     public void raise(int amount) {
