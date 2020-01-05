@@ -31,6 +31,9 @@ public class GameUtils {
         System.out.println("His hand : \n" + playerList.get(bestRankedHandPositions.get(0)).getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
         System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(0).toString());
         System.out.println("\nBest hand rank : " + bestRank);
+        if(bestRankedHandPositions.get(0) == ResourceUtils.REAL_USER_POSITION){
+            System.out.println("You win the turn !!!");
+        }
         System.out.println("Do u want to continue playing ? y/n");
     }
 
@@ -39,6 +42,9 @@ public class GameUtils {
         System.out.println("His hand : \n" + winner.getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
         System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(bestPosition).toString());
         System.out.println("\nBest hand rank : " + bestRank);
+        if(winner.isRealUser()){
+            System.out.println("You win the turn !!!");
+        }
         System.out.println("Do u want to continue playing ? y/n");
     }
     public static void userBetScreen(Deal deal, Hand tableHand, Player realPlayer) {
@@ -46,6 +52,10 @@ public class GameUtils {
         System.out.println(tableHand.toString());
         System.out.println("Your cards \t---------");
         System.out.println(realPlayer.getPlayerHand().toString());
+        if(realPlayer.getLastBidAmount() < deal.getBidAmount() && deal.isBidRaised()){
+            int diff = realPlayer.getLastBidAmount() - deal.getBidAmount();
+            System.out.println("Bid raised : " +  diff + " chips");
+        }
         System.out.println("Current bid: " + deal.getBidAmount());
         System.out.println("Current totalChips on Table : " + deal.getTotalBidOnTable());
         System.out.println("Please Enter your bet if u want to raise ...press for : fold: '1' , call: '2' , check: '3' ");

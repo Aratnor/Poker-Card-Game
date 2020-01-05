@@ -12,6 +12,9 @@ public class Player {
     private boolean isFold;
     private long userChips;
     private Deal deal;
+    private int lastBidAmount;
+
+    private boolean isRealUser = false;
 
     public Player(long userChips,Deal deal) {
         userHand = new Hand(true);
@@ -31,6 +34,7 @@ public class Player {
 
     public void userDoubleBid() {
         int doubleBid = deal.getBidAmount() * 2;
+        lastBidAmount = doubleBid;
         userChips = userChips - doubleBid;
         deal.makeBid(BetType.DOUBLE_BID);
     }
@@ -49,9 +53,11 @@ public class Player {
         return userHand;
     }
     public void check() {
+        lastBidAmount = deal.getBidAmount();
         deal.makeBid(BetType.CHECK);
     }
     public void call() {
+        lastBidAmount = deal.getBidAmount();
         if(canUserCall()){
             userChips = userChips - deal.getBidAmount();
             deal.makeBid(BetType.CALL);
@@ -73,6 +79,7 @@ public class Player {
 
 
     public void raise(int amount) {
+        lastBidAmount = amount + deal.getBidAmount();
         userChips = userChips - amount - deal.getBidAmount();
         deal.makeBid(BetType.RAISE,amount);
     }
@@ -95,5 +102,20 @@ public class Player {
 
     public void setUserChips(long userChips) {
         this.userChips = userChips;
+    }
+
+    public void setRealUser(boolean isRealUser){
+        this.isRealUser = isRealUser;
+    }
+    public boolean isRealUser() {
+        return isRealUser;
+    }
+
+    public int getLastBidAmount() {
+        return lastBidAmount;
+    }
+
+    public void setLastBidAmount(int lastBidAmount) {
+        this.lastBidAmount = lastBidAmount;
     }
 }

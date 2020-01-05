@@ -43,44 +43,15 @@ public class Game {
         Scanner scanner = new Scanner(System.in);
         while(true) {
             if(currentPlayer == playerList.size()) currentPlayer = 0;
+
             addCardToTable();
-            if(deal.getBidTurn() == 3) {
-                Rank bestRank = GameUtils.getBestRank(playerList, tableHand);
-                List<Hand> bestRankedHands = new ArrayList<>();
-                List<Integer> bestRankedHandPositions = new ArrayList<>();
 
-                setBestHands(bestRank, bestRankedHandPositions, bestRankedHands);
-
-                if(bestRankedHandPositions.size() == 1) {
-                    Player winner = playerList.get(bestRankedHandPositions.get(0));
-                    winner.takeAllChipsOnTable();
-                    GameUtils.setWinnerWindow(bestRankedHandPositions,bestRankedHands,playerList,bestRank,tableHand);
-                    String res = scanner.next();
-                    if(res.equals("n")) break;
-                } else {
-                    int bestPosition = 0;
-                    Hand bestPositionRankedHand = bestRankedHands.get(bestPosition);
-                    for(int i = 0;i<bestRankedHands.size();i++) {
-                        int res = RankUtils.
-                                compareTwoSameRankedHand(bestRank, bestPositionRankedHand, bestRankedHands.get(i));
-                        if(res == -1){
-                            bestPositionRankedHand = bestRankedHands.get(i);
-                            bestPosition = i;
-                        }
-                        //TODO En iyi iki el varsa burda kontrol etmek gerekiyor
-                    }
-                    int pos = bestRankedHandPositions.get(bestPosition);
-                    Player winner = playerList.get(pos);
-                    winner.setUserChips(deal.getTotalBidOnTable());
-                    winner.takeAllChipsOnTable();
-                    GameUtils.setWinnerWindow(pos, winner, tableHand, bestPosition, bestRankedHands, bestRank);
-                    String res = scanner.next();
-                    if(res.equals("n")) break;
-
-                }
-                deal.resetBidTurn();
-                setNewHands();
+            boolean checkEndOfTurn = checkEndOfTurn(scanner);
+            if(checkEndOfTurn){
+                String res = scanner.next();
+                if(res.equals("n")) break;
             }
+
             if(currentPlayer == realPlayerPosition && !playerList.get(realPlayerPosition).isFold()){
                 Player realPlayer = playerList.get(realPlayerPosition);
                 GameUtils.userBetScreen(deal, tableHand, realPlayer);
@@ -129,6 +100,47 @@ public class Game {
         tableHand.setHand(deck.dealCardToTable());
     }
 
+    public boolean checkEndOfTurn(Scanner scanner) {
+        if(deal.getBidTurn() == 3) {
+            Rank bestRank = GameUtils.getBestRank(playerList, tableHand);
+            List<Hand> bestRankedHands = new ArrayList<>();
+            List<Integer> bestRankedHandPositions = new ArrayList<>();
+
+            //Getting highest ranked hands with user positions
+            setBestHands(bestRank, bestRankedHandPositions, bestRankedHands);
+
+            //if only one player hand is winner rank
+            if(bestRankedHandPositions.size() == 1) {
+                Player winner = playerList.get(bestRankedHandPositions.get(0));
+                winner.takeAllChipsOnTable();
+                GameUtils.setWinnerWindow(bestRankedHandPositions,bestRankedHands,playerList,bestRank,tableHand);
+            } else {
+                //if more than one user has a same rank hand,than compare hand with the value of cards
+                int bestPosition = 0;
+                Hand bestPositionRankedHand = bestRankedHands.get(bestPosition);
+                for(int i = 0;i<bestRankedHands.size();i++) {
+                    int res = RankUtils.
+                            compareTwoSameRankedHand(bestRank, bestPositionRankedHand, bestRankedHands.get(i));
+                    if(res == -1){
+                        bestPositionRankedHand = bestRankedHands.get(i);
+                        bestPosition = i;
+                    }
+                }
+                //TODO İf there are more than one  rank hand with same value, must be checked here
+                int pos = bestRankedHandPositions.get(bestPosition);
+                Player winner = playerList.get(pos);
+                winner.setUserChips(deal.getTotalBidOnTable());
+                winner.takeAllChipsOnTable();
+                GameUtils.setWinnerWindow(pos, winner, tableHand, bestPosition, bestRankedHands, bestRank);
+
+            }
+            deal.resetBidTurn();
+            setNewHands();
+            return true;
+        }
+        return false;
+    }
+
     public void setNewHands() {
         tableHand.clearHand();
         for(Player player : playerList){
@@ -166,7 +178,7 @@ public class Game {
     }
 
     public void initPlayers() {
-        playerList = PlayerUtils.providePlayers(deal,sizeOfPlayers);
+        playerList = PlayerUtils.providePlayers(deal,sizeOfPlayers,realPlayerPosition);
 
     }
 

@@ -27,7 +27,7 @@ public class Deal {
         totalPlayer = 0;
         isOneTurnCompleted = false;
         this.totalPlayer = playerSize;
-        canCheck = false;
+        canCheck = true;
         currentBetType = BetType.CALL;
     }
 
@@ -50,7 +50,7 @@ public class Deal {
         currentBetType = betType;
         switch (betType) {
             case CHECK:
-                if(currentBetType == BetType.CHECK || isOneTurnCompleted)
+                if(canUserCheck())
                 check();
                 else throw ErrorUtils.getIllegalDealException(betType,currentBetType,isOneTurnCompleted);
                 break;
@@ -70,27 +70,33 @@ public class Deal {
         isOneTurnCompleted = false;
     }
 
+    public boolean canUserCheck() {
+        if ( bidTurn == 0 || isBidRaised) return false;
+        else if(lastBetType == BetType.CALL && totalCheck == totalPlayer) return true;
+        else return true;
+    }
+
     public void call() {
         totalBidOnTable += bidAmount;
-        canCheck = false;
         check();
     }
 
     public void check() {
+        if(totalCheck == totalPlayer) totalCheck = 0;
         if(totalCheck == 0) isOneTurnCompleted = false;
 
         if(lastBetType == BetType.CHECK && currentBetType == BetType.CALL){
             totalCheck = 1;
-            canCheck =true;
-        } else{
+            canCheck =false;
+        }
+        else{
             totalCheck++;
         }
 
-        int diff = isBidRaised ?
-                totalPlayer - foldedPlayers - 1 :
+        int diff = foldedPlayers == 0 ?
+                totalPlayer :
                 totalPlayer - foldedPlayers;
         if(totalCheck == diff) {
-            totalCheck = 0;
             isOneTurnCompleted = true;
             bidTurn++;
             canCheck = true;
@@ -122,9 +128,12 @@ public class Deal {
         canCheck = false;
         totalCheck = 0;
     }
-    public boolean canUserCheck() {
-        return canCheck;
-    }
+    /*public boolean canUserCheck() {
+        if(bidTurn != 0 && totalCheck == 0)
+            return true;
+        else
+            return canCheck;
+    }*/
 
 
     public void allIn(int chips) {
@@ -137,12 +146,19 @@ public class Deal {
 
     public void resetBidTurn() {
         bidTurn = 0;
+        isBidRaised = false;
+        totalCheck = 0;
+        totalBidOnTable = 0;
         bidAmount = ResourceUtils.INITIAL_BID;
     }
     public void raise(int raiseAmount) {
         bidAmount =  bidAmount + raiseAmount;
         totalBidOnTable += bidAmount;
-        totalCheck = 0;
+        if(!isBidRaised && totalCheck == 0)
+        totalCheck++;
+        else {
+            totalCheck = 0;
+        }
         isBidRaised = true;
         currentBetType = BetType.RAISE;
     }
@@ -166,9 +182,16 @@ public class Deal {
     public int getTotalBidOnTable() {
         return totalBidOnTable;
     }
+    public void setBidTurn(int val){
+        bidTurn = val;
+    }
 
     public int getBidTurn() {
         return bidTurn;
+    }
+
+    public boolean isBidRaised() {
+        return isBidRaised;
     }
 
     public boolean isGameTurnFinished() {
