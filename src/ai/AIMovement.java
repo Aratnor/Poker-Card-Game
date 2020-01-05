@@ -28,70 +28,75 @@ public class AIMovement {
     }
 
     public void decideMove(){
-        BetType betType = AIUtils.decideBet(handRank,currentTurn, currentAiPlayer, currentBetType);
-        switch (betType) {
-            case FOLD:
-                currentAiPlayer.foldCurrentTurn();
-                break;
-            case CALL:
-                if(currentAiPlayer.canUserCall()) {
-                    currentAiPlayer.call();
-                    betType = BetType.CALL;
-                }
-                else {
+        if(currentBetType == BetType.CHECK){
+            currentAiPlayer.check();
+            System.out.println("Player : " +currentAiPlayer.toString() +  " \n"+BetType.CHECK +" ...");
+        } else{
+            BetType betType = AIUtils.decideBet(handRank,currentTurn, currentAiPlayer, currentBetType);
+            switch (betType) {
+                case FOLD:
                     currentAiPlayer.foldCurrentTurn();
-                    betType = BetType.FOLD;
-                }
-                break;
-            case DOUBLE_BID:
-                if(currentAiPlayer.canUserBetDoubleBit()) {
-                    currentAiPlayer.userDoubleBid();
-                    betType = BetType.DOUBLE_BID;
-                }
-                else if(currentAiPlayer.canUserCall()) {
-                    currentAiPlayer.call();
-                    betType = BetType.CALL;
-                }
-                else {
-                    currentAiPlayer.foldCurrentTurn();
-                    betType = BetType.FOLD;
-                }
-                break;
-            case CHECK:
-                if(currentAiPlayer.canUserCheck()) {
-                    currentAiPlayer.check();
-                    betType = BetType.CHECK;
-                }
-                else if(currentAiPlayer.canUserCall()) {
-                    currentAiPlayer.call();
-                    betType = BetType.CALL;
-                }
-                else {
-                    currentAiPlayer.foldCurrentTurn();
-                    betType = BetType.FOLD;
-                }
-                break;
-            case RAISE:
-                long userChips = currentAiPlayer.getUserChips();
-                int raiseAmount = bids.get(bids.size() - 1);
-                while((100 * (double)(raiseAmount / userChips)>= 70))
-                    raiseAmount++;
-                if(currentAiPlayer.canUserRaise(raiseAmount)){
-                    currentAiPlayer.raise(raiseAmount);
-                    betType = BetType.RAISE;
-                } else if(currentAiPlayer.canUserBetDoubleBit()){
-                    currentAiPlayer.userDoubleBid();
-                    betType = BetType.DOUBLE_BID;
-                }  else if(currentAiPlayer.canUserCall()) {
-                    currentAiPlayer.call();
-                    betType = BetType.CALL;
-                } else {
-                    currentAiPlayer.foldCurrentTurn();
-                    betType = BetType.FOLD;
-                }
-                break;
+                    break;
+                case CALL:
+                    if(currentAiPlayer.canUserCall()) {
+                        currentAiPlayer.call();
+                        betType = BetType.CALL;
+                    }
+                    else {
+                        currentAiPlayer.foldCurrentTurn();
+                        betType = BetType.FOLD;
+                    }
+                    break;
+                case DOUBLE_BID:
+                    if(currentAiPlayer.canUserBetDoubleBit()) {
+                        currentAiPlayer.userDoubleBid();
+                        betType = BetType.DOUBLE_BID;
+                    }
+                    else if(currentAiPlayer.canUserCall()) {
+                        currentAiPlayer.call();
+                        betType = BetType.CALL;
+                    }
+                    else {
+                        currentAiPlayer.foldCurrentTurn();
+                        betType = BetType.FOLD;
+                    }
+                    break;
+                case CHECK:
+                    if(currentAiPlayer.canUserCheck()) {
+                        currentAiPlayer.check();
+                        betType = BetType.CHECK;
+                    }
+                    else if(currentAiPlayer.canUserCall()) {
+                        currentAiPlayer.call();
+                        betType = BetType.CALL;
+                    }
+                    else {
+                        currentAiPlayer.foldCurrentTurn();
+                        betType = BetType.FOLD;
+                    }
+                    break;
+                case RAISE:
+                    long userChips = currentAiPlayer.getUserChips();
+                    int raiseAmount = bids.get(bids.size() - 1);
+                    while((100 * (double)(raiseAmount / userChips)>= 70))
+                        raiseAmount++;
+                    if(currentAiPlayer.canUserRaise(raiseAmount)){
+                        currentAiPlayer.raise(raiseAmount);
+                        betType = BetType.RAISE;
+                    } else if(currentAiPlayer.canUserBetDoubleBit()){
+                        currentAiPlayer.userDoubleBid();
+                        betType = BetType.DOUBLE_BID;
+                    }  else if(currentAiPlayer.canUserCall()) {
+                        currentAiPlayer.call();
+                        betType = BetType.CALL;
+                    } else {
+                        currentAiPlayer.foldCurrentTurn();
+                        betType = BetType.FOLD;
+                    }
+                    break;
+            }
+            System.out.println("Player : " +currentAiPlayer.toString() +  " \n"+betType +" ...");
         }
-        System.out.println("Player : " +currentAiPlayer.toString() +  " \n"+betType +" ...");
     }
 
 }

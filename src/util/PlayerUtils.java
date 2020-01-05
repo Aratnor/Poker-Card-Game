@@ -12,7 +12,7 @@ public class PlayerUtils {
     public static List<Player> providePlayers(Deal deal, int listSize) {
         List<Player> gamePlayers = new ArrayList<>();
         for(int i = 0;i< listSize;i++) {
-            gamePlayers.add(new Player(500,deal));
+            gamePlayers.add(new Player(ResourceUtils.INITIAL_USER_CHIPS,deal));
         }
         return gamePlayers;
     }

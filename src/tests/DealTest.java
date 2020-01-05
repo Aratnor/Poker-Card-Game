@@ -99,4 +99,63 @@ public class DealTest {
         Assert.assertFalse(deal.isOneTurnCompleted());
         Assert.assertEquals(0,deal.getBidTurn());
     }
+
+    @Test
+    public void testAllCallInOneTurn() {
+        boolean isTurCompleted = deal.isOneTurnCompleted();
+
+        Assert.assertFalse(isTurCompleted);
+        for(Player player : players){
+            player.call();
+        }
+        isTurCompleted = deal.isOneTurnCompleted();
+        Assert.assertTrue(isTurCompleted);
+        for(int i = 0;i<players.size()-1;i++) {
+            players.get(i).call();
+            isTurCompleted = deal.isOneTurnCompleted();
+            Assert.assertFalse(isTurCompleted);
+        }
+        Assert.assertFalse(isTurCompleted);
+        players.get(players.size() - 1).call();
+        isTurCompleted = deal.isOneTurnCompleted();
+        Assert.assertTrue(isTurCompleted);
+    }
+
+    @Test
+    public void testAllCheckInOneTurn() {
+        boolean isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertFalse(isTurnFinished);
+        for(int i = 0;i<players.size();i++){
+            isTurnFinished = deal.isOneTurnCompleted();
+            Assert.assertFalse(isTurnFinished);
+            players.get(i).check();
+        }
+        isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertTrue(isTurnFinished);
+    }
+
+
+     //case ->5 user ,1 check ,4 call,turn should not finish
+    @Test
+    public void testOneCheckOtherCallLoop() {
+        boolean isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertFalse(isTurnFinished);
+        for(int i = 0;i<players.size();i++) {
+            if( i == 0 ){
+                players.get(i).check();
+            } else{
+                players.get(i).call();
+                int totalCheck = deal.getTotalCheck();
+                System.out.println("Total check :" + totalCheck + "i :" + i);
+            }
+            isTurnFinished = deal.isOneTurnCompleted();
+            Assert.assertFalse(isTurnFinished);
+        }
+        isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertFalse(isTurnFinished);
+        players.get(0).check();
+        isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertTrue(isTurnFinished);
+
+    }
 }

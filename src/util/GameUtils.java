@@ -48,6 +48,6 @@ public class GameUtils {
         System.out.println(realPlayer.getPlayerHand().toString());
         System.out.println("Current bid: " + deal.getBidAmount());
         System.out.println("Current totalChips on Table : " + deal.getTotalBidOnTable());
-        System.out.println("Please Enter your bet if u want to raise ... fold 1 , call 2 ,");
+        System.out.println("Please Enter your bet if u want to raise ...press for : fold: '1' , call: '2' , check: '3' ");
     }
 }

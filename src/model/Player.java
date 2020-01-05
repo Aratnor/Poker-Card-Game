@@ -1,6 +1,7 @@
 package model;
 
 import game.Deal;
+import model.bet.BetType;
 import model.card.Card;
 import model.card.Hand;
 
@@ -31,25 +32,31 @@ public class Player {
     public void userDoubleBid() {
         int doubleBid = deal.getBidAmount() * 2;
         userChips = userChips - doubleBid;
-        deal.doubleBid();
+        deal.makeBid(BetType.DOUBLE_BID);
     }
 
     public void foldCurrentTurn() {
-        deal.fold();
+        deal.makeBid(BetType.FOLD);
         isFold = true;
+    }
+
+    public void takeAllChipsOnTable() {
+        userChips = userChips + deal.getTotalBidOnTable();
+        deal.clearTotalBidOnTable();
     }
 
     public Hand getPlayerHand() {
         return userHand;
     }
     public void check() {
-        deal.check();
+        deal.makeBid(BetType.CHECK);
     }
     public void call() {
         if(canUserCall()){
             userChips = userChips - deal.getBidAmount();
-            deal.call();
-        }
+            deal.makeBid(BetType.CALL);
+        } else
+            deal.makeBid(BetType.FOLD);
     }
     public void addChipsToUser(int newChips) {
         userChips += newChips;
@@ -64,15 +71,10 @@ public class Player {
         return userChips >= totalChips;
     }
 
-    public void userRaiseBid(int amount) {
-        int totalChips = amount + deal.getBidAmount();
-        userChips = userChips - totalChips;
-        deal.raise(amount);
-    }
 
     public void raise(int amount) {
         userChips = userChips - amount - deal.getBidAmount();
-        deal.raise(amount);
+        deal.makeBid(BetType.RAISE,amount);
     }
 
     public boolean isFold() {

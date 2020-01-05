@@ -1,23 +1,26 @@
 package game;
 
 import model.bet.BetType;
-import util.BidUtils;
+import tests.DealTest;
+import util.ErrorUtils;
+import util.ResourceUtils;
 
 public class Deal {
-    int bidAmount;
-    int totalBidOnTable;
-    int totalCheck;
-    int totalPlayer;
-    int bidTurn = 0;
-    int foldedPlayers = 0;
-    BetType currentBetType;
+    private int bidAmount;
+    private int totalBidOnTable;
+    private int totalCheck;
+    private int totalPlayer;
+    private int bidTurn = 0;
+    private int foldedPlayers = 0;
+    private BetType currentBetType;
+    private BetType lastBetType;
 
-    boolean canCheck;
-    boolean isBidRaised;
-    boolean isOneTurnCompleted;
+    private boolean canCheck;
+    private boolean isBidRaised;
+    private boolean isOneTurnCompleted;
 
     public Deal(int playerSize) {
-        bidAmount = BidUtils.INITIAL_BID;
+        bidAmount = ResourceUtils.INITIAL_BID;
         totalBidOnTable = 0;
         isBidRaised = false;
         totalCheck = 0;
@@ -28,19 +31,61 @@ public class Deal {
         currentBetType = BetType.CALL;
     }
 
-    public void call() {
-        totalBidOnTable += bidAmount;
-        canCheck = false;
-        currentBetType = BetType.CALL;
-        check();
+    public void makeBid(BetType betType,int chips){
+        lastBetType = currentBetType;
+        currentBetType = betType;
+        switch (betType){
+            case RAISE:
+                raise(chips);
+                break;
+            case ALL_IN:
+                allIn(chips);
+                break;
+                default:
+                    throw ErrorUtils.getIllegalDealException(betType,currentBetType,isOneTurnCompleted);
+        }
+    }
+    public void makeBid(BetType betType){
+        lastBetType = currentBetType;
+        currentBetType = betType;
+        switch (betType) {
+            case CHECK:
+                if(currentBetType == BetType.CHECK || isOneTurnCompleted)
+                check();
+                else throw ErrorUtils.getIllegalDealException(betType,currentBetType,isOneTurnCompleted);
+                break;
+            case DOUBLE_BID:
+                doubleBid();
+                break;
+            case FOLD:
+                fold();
+                break;
+            case CALL:
+                call();
+                break;
+        }
     }
 
     public void setOneTurnCompleted(boolean value) {
         isOneTurnCompleted = false;
     }
 
+    public void call() {
+        totalBidOnTable += bidAmount;
+        canCheck = false;
+        check();
+    }
+
     public void check() {
-        totalCheck++;
+        if(totalCheck == 0) isOneTurnCompleted = false;
+
+        if(lastBetType == BetType.CHECK && currentBetType == BetType.CALL){
+            totalCheck = 1;
+            canCheck =true;
+        } else{
+            totalCheck++;
+        }
+
         int diff = isBidRaised ?
                 totalPlayer - foldedPlayers - 1 :
                 totalPlayer - foldedPlayers;
@@ -81,10 +126,6 @@ public class Deal {
         return canCheck;
     }
 
-    public void checkBid() {
-        check();
-        currentBetType = BetType.CHECK;
-    }
 
     public void allIn(int chips) {
         bidAmount = chips;
@@ -96,7 +137,7 @@ public class Deal {
 
     public void resetBidTurn() {
         bidTurn = 0;
-        bidAmount = BidUtils.INITIAL_BID;
+        bidAmount = ResourceUtils.INITIAL_BID;
     }
     public void raise(int raiseAmount) {
         bidAmount =  bidAmount + raiseAmount;
@@ -112,6 +153,10 @@ public class Deal {
 
     public boolean isOneTurnCompleted() {
         return isOneTurnCompleted;
+    }
+
+    public BetType getCurrentBetType() {
+        return currentBetType;
     }
 
     public void setBidAmount(int bidAmount) {

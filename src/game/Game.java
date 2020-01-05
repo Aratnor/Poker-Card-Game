@@ -52,6 +52,8 @@ public class Game {
                 setBestHands(bestRank, bestRankedHandPositions, bestRankedHands);
 
                 if(bestRankedHandPositions.size() == 1) {
+                    Player winner = playerList.get(bestRankedHandPositions.get(0));
+                    winner.takeAllChipsOnTable();
                     GameUtils.setWinnerWindow(bestRankedHandPositions,bestRankedHands,playerList,bestRank,tableHand);
                     String res = scanner.next();
                     if(res.equals("n")) break;
@@ -70,7 +72,7 @@ public class Game {
                     int pos = bestRankedHandPositions.get(bestPosition);
                     Player winner = playerList.get(pos);
                     winner.setUserChips(deal.getTotalBidOnTable());
-                    deal.clearTotalBidOnTable();
+                    winner.takeAllChipsOnTable();
                     GameUtils.setWinnerWindow(pos, winner, tableHand, bestPosition, bestRankedHands, bestRank);
                     String res = scanner.next();
                     if(res.equals("n")) break;
@@ -90,6 +92,12 @@ public class Game {
                     case 2 :
                         realPlayer.call();
                         break;
+                    case 3:
+                        if(realPlayer.canUserCheck()){
+                            realPlayer.check();
+                        } else {
+                            realPlayer.call();
+                        }
                     default :
                         realPlayer.raise(betValue);
                 }
@@ -104,7 +112,7 @@ public class Game {
                 Rank handRank = handRanker.getRankOfHand();
                 Hand rankedHand = new Hand(false);
                 rankedHand.setHand(handRanker.getRankedCards());
-                AIMovement aiMovement = new AIMovement(currentAiPlayer,handRank,rankedHand,deal.bidAmount,deal.getBidTurn(),deal.currentBetType);
+                AIMovement aiMovement = new AIMovement(currentAiPlayer,handRank,rankedHand,deal.getBidAmount(),deal.getBidTurn(),deal.getCurrentBetType());
                 aiMovement.decideMove();
                 try {
                     Thread.sleep(1000);
@@ -146,7 +154,7 @@ public class Game {
     }
 
     private void addCardToTable(){
-        if(deal.isOneTurnCompleted && deal.getBidTurn() < 3){
+        if(deal.isOneTurnCompleted() && deal.getBidTurn() < 3){
             tableHand.addCardToHand(deck.getCard());
             deal.setOneTurnCompleted(false);
         }
