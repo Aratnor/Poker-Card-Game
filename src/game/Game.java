@@ -66,9 +66,12 @@ public class Game {
                     case 3:
                         if(realPlayer.canUserCheck()){
                             realPlayer.check();
+                            System.out.println("You played  check ...");
                         } else {
+                            System.out.println("You cant check in that condition, \nYou played call ...");
                             realPlayer.call();
                         }
+                        break;
                     default :
                         realPlayer.raise(betValue);
                 }

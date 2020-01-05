@@ -45,6 +45,7 @@ public class Player {
     }
 
     public void takeAllChipsOnTable() {
+        System.out.println("Player :" + this + " earn " + deal.getTotalBidOnTable() +  " chips  on the table ...");
         userChips = userChips + deal.getTotalBidOnTable();
         deal.clearTotalBidOnTable();
     }

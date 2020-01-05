@@ -194,4 +194,23 @@ public class DealTest {
         Assert.assertEquals(5,totalCheck);
     }
 
+    @Test
+    public void testAfterCheckedTurn(){
+        deal.setBidTurn(1);
+        for(Player player : players){
+            player.check();
+        }
+        int totalCheck = deal.getTotalCheck();
+        Assert.assertEquals(5,totalCheck);
+        int bidTurn = deal.getBidTurn();
+        Assert.assertEquals(2,bidTurn);
+        boolean isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertTrue(isTurnFinished);
+        players.get(0).call();
+        totalCheck = deal.getTotalCheck();
+        Assert.assertEquals(1,totalCheck);
+        isTurnFinished = deal.isOneTurnCompleted();
+        Assert.assertFalse(isTurnFinished);
+    }
+
 }

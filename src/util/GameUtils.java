@@ -14,6 +14,7 @@ public class GameUtils {
         Rank bestRank =  Rank.High_Card;
         for(int i = 0; i < playerList.size(); i++) {
             Player realPlayer = playerList.get(i);
+            if(realPlayer.isFold()) continue;
             HandRank handRank = new HandRank(tableHand, realPlayer.getPlayerHand());
             Rank rankPlayer = handRank.getRankOfHand();
             if(i == 0){
@@ -27,8 +28,13 @@ public class GameUtils {
     }
 
     public static void setWinnerWindow(List<Integer> bestRankedHandPositions, List<Hand> bestRankedHands, List<Player> playerList, Rank bestRank,Hand tableHand) {
+        StringBuilder builder = new StringBuilder();
+        if(bestRankedHandPositions.get(0) == ResourceUtils.REAL_USER_POSITION){
+            builder.append("Your hand : \n");
+        } else
+            builder.append("His hand : \n");
         System.out.println("Player : " + bestRankedHandPositions.get(0) +  " take the turn .");
-        System.out.println("His hand : \n" + playerList.get(bestRankedHandPositions.get(0)).getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
+        System.out.println(builder.toString() + playerList.get(bestRankedHandPositions.get(0)).getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
         System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(0).toString());
         System.out.println("\nBest hand rank : " + bestRank);
         if(bestRankedHandPositions.get(0) == ResourceUtils.REAL_USER_POSITION){
@@ -39,7 +45,12 @@ public class GameUtils {
 
     public static void setWinnerWindow(int pos,Player winner, Hand tableHand,int bestPosition,List<Hand> bestRankedHands,Rank bestRank){
         System.out.println("Player : " + pos +  " take the turn .");
-        System.out.println("His hand : \n" + winner.getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
+        StringBuilder builder = new StringBuilder();
+        if(winner.isRealUser()){
+            builder.append("Your hand : \n");
+        } else
+            builder.append("His hand : \n");
+        System.out.println(builder.toString() + winner.getPlayerHand().toString() + " \ntable :\n" + tableHand.toString());
         System.out.println("Winner cards : ---------- \n" + bestRankedHands.get(bestPosition).toString());
         System.out.println("\nBest hand rank : " + bestRank);
         if(winner.isRealUser()){
